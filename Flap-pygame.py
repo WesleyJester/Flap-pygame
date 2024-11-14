@@ -162,7 +162,7 @@ PIPE_VELOCITY = -4  # Slightly faster initial speed by making this more negative
 def increase_difficulty(score):
     global PIPE_VELOCITY, PIPE_GAP
     if score % 10 == 0 and score != 0:
-        PIPE_VELOCITY -= 0.03  # Slightly increase speed every 10 points
+        PIPE_VELOCITY -= 0.02  # Slightly increase speed every 10 points
         PIPE_GAP = max(170, PIPE_GAP - 10)  # Maintain a reasonable minimum gap size
 
 
@@ -223,6 +223,13 @@ def start_game():
             waiting_to_start = False
         
         if draw_button("Quit", SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 150, TEAL, CLOUD_BURST):
+            # Display "Thank you for playing" message
+            thank_you_text = FONT1.render("Thank you for playing!", True, WHITE)
+            thank_you_rect = thank_you_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+            SCREEN.fill(BLACK)  # Clear the screen
+            SCREEN.blit(thank_you_text, thank_you_rect)
+            pygame.display.update()
+            time.sleep(2) 
             pygame.quit()
             exit()
         
@@ -245,26 +252,42 @@ def game_over_screen():
     pygame.display.update()
 
     # Center the text
-    game_over_rect = game_over_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 40))
-    score_rect = score_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
-    high_score_rect = high_score_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 30))
-     
+    game_over_rect = game_over_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50))
+    SCREEN.blit(game_over_text, game_over_rect)
+
+    # Center the text with score and high score under the Game Over title
+    score_rect = score_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 20))
+    high_score_rect = high_score_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
     SCREEN.blit(score_text, score_rect)
     SCREEN.blit(high_score_text, high_score_rect)
-
+    
+    # Save high score if the new score is higher
+    if score > high_score:
+        save_high_score(score)
+    
+    # Check for quit or restart
     pygame.display.update()
-
-    while True:
-        if draw_button("Restart", SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 150, TEAL, CLOUD_BURST):
+    time.sleep(0)
+    waiting_for_restart = True
+    while waiting_for_restart:
+        # Check for quit or restart button clicks
+        if draw_button("Restart", SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100, TEAL, CLOUD_BURST):
             reset_game()
-            break
-        
-        if draw_button("Quit", SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 220, TEAL, CLOUD_BURST):
+            return
+        if draw_button("Quit", SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 180, TEAL, CLOUD_BURST):
+            # Display "Thank you for playing" message
+            thank_you_text = FONT1.render("Thank you for playing!", True, WHITE)
+            thank_you_rect = thank_you_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+            SCREEN.fill(BLACK)  # Clear the screen
+            SCREEN.blit(thank_you_text, thank_you_rect)
+            pygame.display.update()
+            time.sleep(2)  # Wait a moment before quitting
             pygame.quit()
             exit()
-
-        pygame.display.update()
         
+        pygame.display.update()
+
+        # Check for quit event
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
